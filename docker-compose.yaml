@@ -1,5 +1,4 @@
-version: "3.9" # Use the latest stable version if possible
-name: kpi-demo
+version: "3.9"
 services:
   redis:
     image: redis:7
@@ -9,8 +8,9 @@ services:
       - "6379:6379"
     networks:
       - backend
+
   communication-control:
-    image: registry.gitlab.com/kzotkin/hiveemulator/communication-control
+    image: ghcr.io/levastian/hiveemulator/communication-control:latest
     container_name: com-control
     restart: always
     environment:
@@ -19,17 +19,21 @@ services:
       - "8080:8080"
     networks:
       - backend
+    depends_on:
+      - redis
 
   map-client:
-    image: registry.gitlab.com/kzotkin/hiveemulator/map-client
+    image: ghcr.io/levastian/hiveemulator/map-client:latest
     container_name: map-client
     restart: always
     ports:
-      - "8081:80"
+      - "80:80"
     volumes:
       - ./config.json:/usr/share/nginx/html/config.json:ro
     networks:
       - backend
+    depends_on:
+      - communication-control
 
 networks:
   backend:
