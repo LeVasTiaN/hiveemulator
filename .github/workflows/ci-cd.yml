@@ -122,10 +122,9 @@ jobs:
             "sudo docker stop com-control map-client redis prometheus grafana node-exporter 2>/dev/null || true && \
              sudo docker rm com-control map-client redis prometheus grafana node-exporter 2>/dev/null || true && \
              sudo docker system prune -af && \
+             echo '{\"API\": \"http://${SERVER_IP}:8080/api/v1/client\"}' > ~/config.json && \
              echo ${GH_TOKEN} | sudo docker login ghcr.io -u ${GH_ACTOR} --password-stdin && \
              sudo docker compose -f ~/docker-compose.yaml pull && \
-             sudo docker compose -f ~/docker-compose.yaml up -d && \
-             sleep 5 && \
-             sudo docker exec map-client sh -c 'echo \"{\\\"API\\\": \\\"http://${SERVER_IP}:8080/api/v1/client\\\"}\" > /usr/share/nginx/html/config.json'"
+             sudo docker compose -f ~/docker-compose.yaml up -d"
 
           rm -f key.pem
