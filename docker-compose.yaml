@@ -4,8 +4,6 @@ services:
     image: redis:7
     container_name: redis
     restart: always
-    ports:
-      - "6379:6379"
     networks:
       - backend
 
@@ -15,6 +13,7 @@ services:
     restart: always
     environment:
       Redis__ConnectionString: "redis:6379"
+      ASPNETCORE_URLS: "http://+:8080,http://+:9090"
     ports:
       - "8080:8080"
     networks:
@@ -35,5 +34,35 @@ services:
     depends_on:
       - communication-control
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: always
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    networks:
+      - backend
+
 networks:
   backend:
+    driver: bridge

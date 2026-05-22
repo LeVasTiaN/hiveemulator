@@ -115,12 +115,17 @@ jobs:
           scp -o StrictHostKeyChecking=no -i key.pem \
             docker-compose.yaml ${SERVER_USER}@${SERVER_IP}:~/docker-compose.yaml
 
+          scp -o StrictHostKeyChecking=no -i key.pem \
+            prometheus.yml ${SERVER_USER}@${SERVER_IP}:~/prometheus.yml
+
           ssh -o StrictHostKeyChecking=no -i key.pem ${SERVER_USER}@${SERVER_IP} \
-            "sudo docker stop com-control map-client redis 2>/dev/null || true && \
-             sudo docker rm com-control map-client redis 2>/dev/null || true && \
+            "sudo docker stop com-control map-client redis prometheus grafana node-exporter 2>/dev/null || true && \
+             sudo docker rm com-control map-client redis prometheus grafana node-exporter 2>/dev/null || true && \
              sudo docker system prune -af && \
              echo ${GH_TOKEN} | sudo docker login ghcr.io -u ${GH_ACTOR} --password-stdin && \
              sudo docker compose -f ~/docker-compose.yaml pull && \
-             sudo docker compose -f ~/docker-compose.yaml up -d"
+             sudo docker compose -f ~/docker-compose.yaml up -d && \
+             sleep 5 && \
+             sudo docker exec map-client sh -c 'echo \"{\\\"API\\\": \\\"http://${SERVER_IP}:8080/api/v1/client\\\"}\" > /usr/share/nginx/html/config.json'"
 
           rm -f key.pem
